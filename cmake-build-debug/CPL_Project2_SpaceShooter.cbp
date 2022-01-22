@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="CPL_Project2_SpaceShooter"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="SpaceShooter">
+				<Option output="E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/SpaceShooter.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="E:/GitWork/CPL-Project2-SpaceShooter/."/>
+					<Add directory="E:/GitWork/CPL-Project2-SpaceShooter/include"/>
+					<Add directory="E:/GitWork/CPL-Project2-SpaceShooter/lib"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include/c++"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include/c++/i686-w64-mingw32"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include/c++/backward"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include-fixed"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/../../../../i686-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 SpaceShooter"/>
+					<CompileFile command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="SpaceShooter/fast">
+				<Option output="E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/SpaceShooter.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="E:/GitWork/CPL-Project2-SpaceShooter/."/>
+					<Add directory="E:/GitWork/CPL-Project2-SpaceShooter/include"/>
+					<Add directory="E:/GitWork/CPL-Project2-SpaceShooter/lib"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include/c++"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include/c++/i686-w64-mingw32"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include/c++/backward"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/include-fixed"/>
+					<Add directory="c:\raylib\w64devkit\bin\../lib/gcc/i686-w64-mingw32/11.2.0/../../../../i686-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 SpaceShooter/fast"/>
+					<CompileFile command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/raylib/w64devkit/bin/mingw32-make.exe -f &quot;E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="E:/GitWork/CPL-Project2-SpaceShooter/SpaceShooter.c">
+			<Option target="SpaceShooter"/>
+		</Unit>
+		<Unit filename="E:/GitWork/CPL-Project2-SpaceShooter/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

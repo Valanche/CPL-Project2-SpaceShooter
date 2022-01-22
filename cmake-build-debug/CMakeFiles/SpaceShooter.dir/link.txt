@@ -1,0 +1,3 @@
+"C:\Program Files\JetBrains\CLion 2021.2.2\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\SpaceShooter.dir/objects.a
+C:\raylib\w64devkit\bin\ar.exe cr CMakeFiles\SpaceShooter.dir/objects.a @CMakeFiles\SpaceShooter.dir\objects1.rsp
+C:\raylib\w64devkit\bin\gcc.exe -g -Wl,--whole-archive CMakeFiles\SpaceShooter.dir/objects.a -Wl,--no-whole-archive -o SpaceShooter.exe -Wl,--out-implib,libSpaceShooter.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\SpaceShooter.dir\linklibs.rsp
