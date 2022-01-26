@@ -1,3 +1,4 @@
+E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/CMakeFiles/sample.dir
 E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/CMakeFiles/SpaceShooter.dir
 E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/CMakeFiles/edit_cache.dir
 E:/GitWork/CPL-Project2-SpaceShooter/cmake-build-debug/CMakeFiles/rebuild_cache.dir

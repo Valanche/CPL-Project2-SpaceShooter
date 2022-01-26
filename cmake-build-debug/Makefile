@@ -116,6 +116,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named sample
+
+# Build rule for target.
+sample: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 sample
+.PHONY : sample
+
+# fast build rule for target.
+sample/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\sample.dir\build.make CMakeFiles/sample.dir/build
+.PHONY : sample/fast
+
+#=============================================================================
 # Target rules for targets named SpaceShooter
 
 # Build rule for target.
@@ -152,6 +165,30 @@ SpaceShooter.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\SpaceShooter.dir\build.make CMakeFiles/SpaceShooter.dir/SpaceShooter.c.s
 .PHONY : SpaceShooter.c.s
 
+sample.obj: sample.c.obj
+.PHONY : sample.obj
+
+# target to build an object file
+sample.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\sample.dir\build.make CMakeFiles/sample.dir/sample.c.obj
+.PHONY : sample.c.obj
+
+sample.i: sample.c.i
+.PHONY : sample.i
+
+# target to preprocess a source file
+sample.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\sample.dir\build.make CMakeFiles/sample.dir/sample.c.i
+.PHONY : sample.c.i
+
+sample.s: sample.c.s
+.PHONY : sample.s
+
+# target to generate assembly for a file
+sample.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\sample.dir\build.make CMakeFiles/sample.dir/sample.c.s
+.PHONY : sample.c.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -161,9 +198,13 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... SpaceShooter
+	@echo ... sample
 	@echo ... SpaceShooter.obj
 	@echo ... SpaceShooter.i
 	@echo ... SpaceShooter.s
+	@echo ... sample.obj
+	@echo ... sample.i
+	@echo ... sample.s
 .PHONY : help
 
 

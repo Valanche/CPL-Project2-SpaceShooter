@@ -62,6 +62,7 @@ CMAKE_BINARY_DIR = E:\GitWork\CPL-Project2-SpaceShooter\cmake-build-debug
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: CMakeFiles/sample.dir/all
 all: CMakeFiles/SpaceShooter.dir/all
 .PHONY : all
 
@@ -70,8 +71,35 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: CMakeFiles/sample.dir/clean
 clean: CMakeFiles/SpaceShooter.dir/clean
 .PHONY : clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/sample.dir
+
+# All Build rule for target.
+CMakeFiles/sample.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\sample.dir\build.make CMakeFiles/sample.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\sample.dir\build.make CMakeFiles/sample.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=E:\GitWork\CPL-Project2-SpaceShooter\cmake-build-debug\CMakeFiles --progress-num=3,4 "Built target sample"
+.PHONY : CMakeFiles/sample.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/sample.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start E:\GitWork\CPL-Project2-SpaceShooter\cmake-build-debug\CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/sample.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start E:\GitWork\CPL-Project2-SpaceShooter\cmake-build-debug\CMakeFiles 0
+.PHONY : CMakeFiles/sample.dir/rule
+
+# Convenience name for target.
+sample: CMakeFiles/sample.dir/rule
+.PHONY : sample
+
+# clean rule for target.
+CMakeFiles/sample.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\sample.dir\build.make CMakeFiles/sample.dir/clean
+.PHONY : CMakeFiles/sample.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/SpaceShooter.dir

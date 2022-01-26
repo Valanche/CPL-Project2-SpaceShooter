@@ -7,5 +7,5 @@ include_directories(.)
 include_directories(include)
 include_directories(lib)
 
-add_executable(SpaceShooter
-        SpaceShooter.c)
+add_executable(SpaceShooter SpaceShooter.c)
+add_executable(sample sample.c)
