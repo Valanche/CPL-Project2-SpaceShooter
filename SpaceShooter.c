@@ -424,7 +424,7 @@ void UpdateGame(void){
 
                         if (g_smooth) g_alpha -= 0.02f;
 
-                        if (g_enemyKills == 20)
+                        if (g_enemyKills/2 == 20)
                         {
                             g_enemyKills = 0;
                             g_stage = SECOND;
@@ -444,7 +444,7 @@ void UpdateGame(void){
                         if (g_smooth) g_alpha -= 0.02f;
 
 
-                        if (g_enemyKills == 50)
+                        if (g_enemyKills/2 == 50)
                         {
                             g_enemyKills = 0;
                             g_stage = THIRD;
@@ -525,6 +525,8 @@ void DrawGame(void)
     for (int i = g_numOfShield +1; 1<= i && i <= 9; i++) {
         DrawRectangle(370 + (i-1)*31, 840, 27, 10, GRAY);
     }
+
+    DrawText(TextFormat("KILL: %d", g_enemyKills/2), 480 - MeasureText("KILL:100",48)/2, 880, 48, WHITE);
 
     DrawTextureEx(g_player.texture, (Vector2){g_player.hitbox.x - 32, g_player.hitbox.y - 32}, 0, 0.5f, g_player.color);
     //DrawRectangle(g_player.hitbox.x, g_player.hitbox.y, 96, 96, g_player.color );
