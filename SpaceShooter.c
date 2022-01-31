@@ -51,7 +51,7 @@
 
 // other stats
 #define FIRST_REQUIREMENT 16
-#define SECOND_REQUIREMENT 48
+#define SECOND_REQUIREMENT 36
 
 
 
@@ -448,6 +448,15 @@ void UpdateShoot(Shoot * shoot, int maxShoot, int frequency, int flag){
                             }
                         }
                         
+                    }
+
+                    if(shoot[i].type == HIVE){
+                        for (int j = 0; j < NUM_MAX_ENEMY_SHOOT; j++) {
+                            if(CheckCollisionRecs(shoot[i].hitbox, g_enemyShoot[j].hitbox)){
+                                g_enemyShoot[j].active = false;
+
+                            }
+                        }
                     }
                     break;
                 case 1:
