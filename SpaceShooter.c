@@ -13,13 +13,14 @@
 #define NUM_PLAYER_HIVE 108
 #define NUM_PLAYER_ARC 16
 
-#define NUM_MAX_ENEMY1 3
-#define NUM_MAX_ENEMY2 4
+#define NUM_MAX_ENEMY1 4
+#define NUM_MAX_ENEMY2 3
 #define NUM_MAX_ENEMY3 1
 
 #define NUM_MAX_ENEMY_SHOOT 96
 #define NUM_MAX_ENEMY_ARC 24
 #define NUM_MAX_BOSS_SHOOT 96
+#define NUM_MAX_BOSS_ARC 48
 
 #define NUM_MAX_ITEM 3
 
@@ -36,22 +37,30 @@
 
 
 #define ENEMY1_HEAT_MAX 4
-#define ENEMY1_HP 3
+#define ENEMY1_HP 4
 
-#define ENEMY2_HEAT_MAX 12
-#define ENEMY2_HP 5
+#define ENEMY2_HEAT_MAX 8
+#define ENEMY2_HP 6
 
 #define ENEMY3_HEAT_MAX 4
 #define ENEMY3_HP 12
 
-#define ENEMY_SHOOT_FREQUENCY 100
+#define BOSS_HEAT_MAX 8
+#define BOSS_HP 512
+
+#define ENEMY_SHOOT_FREQUENCY 80
 #define ENEMY_ARC_FOCUS 128
 #define ENEMY_ARC_DURATION 512
 #define ENEMY_ARC_COOLDOWN 256
 
+#define BOSS_SHOOT_FREQUENCY 16
+#define BOSS_ARC_FOCUS 108
+#define BOSS_ARC_DURATION 256
+#define BOSS_ARC_COOLDOWN 256
+
 // other stats
-#define FIRST_REQUIREMENT 16
-#define SECOND_REQUIREMENT 36
+#define FIRST_REQUIREMENT 4
+#define SECOND_REQUIREMENT 4
 
 
 
@@ -107,6 +116,7 @@ typedef struct Shoot{
     static Enemy g_enemy1[NUM_MAX_ENEMY1] ={0};
     static Enemy g_enemy2[NUM_MAX_ENEMY2] ={0};
     static Enemy g_enemy3[NUM_MAX_ENEMY3] ={0};
+    static Enemy g_boss = {0};
 
     static Enemy g_items[NUM_MAX_ITEM] = {0};
 
@@ -117,6 +127,7 @@ typedef struct Shoot{
     static Shoot g_enemyShoot[NUM_MAX_ENEMY_SHOOT] = {0};
     static Shoot g_enemyArc[NUM_MAX_ENEMY_ARC] = {0};
     static Shoot g_bossShoot[NUM_MAX_BOSS_SHOOT] = {0};
+    static Shoot g_bossArc[NUM_MAX_BOSS_ARC] = {0};
     //numbers
     static int g_numOfArc, g_numOfHive, g_numOfShield;
 
@@ -143,7 +154,7 @@ typedef struct Shoot{
     //images
     Texture2D g_arcTexture, g_hiveTexture, g_shieldTexture,
               g_playerShootTexture, g_hiveShootTexture, g_arcHeadTexture, g_arcBodyTexture, //player shoot
-              g_enemyShootTexture, g_EArcHeadTexture, g_EArcBodyTexture, g_bossShootTexture, //enemy shoot
+              g_enemyShootTexture, g_EArcHeadTexture, g_EArcBodyTexture, g_bossShootTexture, g_bossArcHTexture, g_bossArcBTexture, //enemy shoot
               g_enemy1Texture, g_enemy2Texture,
               g_enemy3OTexture, g_enemy3ATexture, g_enemy3HTexture, g_enemy3STexture,
               g_bossTexture, g_playerTexture;
@@ -159,9 +170,11 @@ static void InitGame(void);// Initialize game
 static void UpdateGame(void);       // Update game (one frame)
 static void UpdateShoot(Shoot *shoot, int maxShoot, int frequency, int flag);
 static void UpdateArc(Shoot * shoot, int maxShoot, int frequency, int flag);
+static void UpdateBossArc(Shoot * shoot, int maxShoot, int frequency, int flag);
 static void UpdateEnemy1(Enemy * enemy, Shoot * shoot, int maxEnemy);
 static void UpdateEnemy2(Enemy * enemy, Shoot * shoot, int maxEnemy);
 static void UpdateEnemy3(Enemy * enemy, Shoot * shoot, int maxEnemy);
+static void UpdateBoss(Enemy * enemy, Shoot * shoot);
 static void UpdateItems(Enemy * enemy, Shoot * shoot, int maxEnemy);
 
 static void DrawGame(void);         // Draw game (one frame)
@@ -221,11 +234,14 @@ void LoadImgs(void){
     g_enemy3ATexture = LoadTexture("Textures/Enemy3A.png");
     g_enemy3HTexture = LoadTexture("Textures/Enemy3H.png");
     g_enemy3STexture = LoadTexture("Textures/Enemy3S.png");
+    g_bossTexture = LoadTexture("Textures/Boss.png");
 
     g_enemyShootTexture = LoadTexture("Textures/EnemyShoot.png");
     g_EArcHeadTexture = LoadTexture("Textures/EArcHead.png");
     g_EArcBodyTexture = LoadTexture("Textures/EArcBody.png");
     g_bossShootTexture = LoadTexture("Textures/BossShoot.png");
+    g_bossArcHTexture = LoadTexture("Textures/BArcHead.png");
+    g_bossArcBTexture = LoadTexture("Textures/BArcBody.png");
 
 }
 
@@ -311,6 +327,19 @@ void InitGame(void)
         g_enemy3[i].heat = 0;
     }
 
+    g_boss.active = false;
+    g_boss.hitbox.width = 256;
+    g_boss.hitbox.height = 176;
+    g_boss.hitbox.x = 352;
+    g_boss.hitbox.y = 12;
+    g_boss.type = BOSS;
+    g_boss.state = NORMAL;
+    g_boss.speed.y = 1;
+    g_boss.color = WHITE;
+    g_boss.health = BOSS_HP;
+    g_boss.shootRate = 0;
+    g_boss.heat = 0;
+
 
     // Initialize shoots
     for (int i = 0; i < NUM_PLAYER_SHOOT; i++) {
@@ -372,6 +401,25 @@ void InitGame(void)
         g_enemyArc[i].type = EARC;
         g_enemyArc[i].active = false;
         g_enemyArc[i].damage = 1;
+    }
+    for (int i = 0; i < NUM_MAX_BOSS_SHOOT; i++) {
+        g_bossShoot[i].hitbox.width = 12;
+        g_bossShoot[i].hitbox.height = 12;
+        g_bossShoot[i].speed.y = 0;
+        g_bossShoot[i].speed.x = 0;
+        g_bossShoot[i].type = BOSS;
+        g_bossShoot[i].active = false;
+        g_bossShoot[i].damage = 1;
+
+    }
+    for (int i = 0; i < NUM_MAX_BOSS_ARC; i++) {
+        g_bossArc[i].hitbox.width = 256;
+        g_bossArc[i].hitbox.height = 700;
+        g_bossArc[i].speed.y = 0;
+        g_bossArc[i].speed.x = 0;
+        g_bossArc[i].type = EARC;
+        g_bossArc[i].active = false;
+        g_bossArc[i].damage = 1;
     }
 
     // initialize items
@@ -450,6 +498,15 @@ void UpdateShoot(Shoot * shoot, int maxShoot, int frequency, int flag){
                         
                     }
 
+                    if(g_boss.active){
+                        if(CheckCollisionRecs(shoot[i].hitbox, g_boss.hitbox)){
+                            shoot[i].active = false;
+                            g_boss. state= HIT;
+                            g_boss. health -= shoot[i].damage;
+                            g_shootRate -= frequency;
+                        }
+                    }
+
                     if(shoot[i].type == HIVE){
                         for (int j = 0; j < NUM_MAX_ENEMY_SHOOT; j++) {
                             if(CheckCollisionRecs(shoot[i].hitbox, g_enemyShoot[j].hitbox)){
@@ -457,8 +514,16 @@ void UpdateShoot(Shoot * shoot, int maxShoot, int frequency, int flag){
 
                             }
                         }
+                        for (int j = 0; j < NUM_MAX_BOSS_SHOOT; j++) {
+                            if(CheckCollisionRecs(shoot[i].hitbox, g_bossShoot[j].hitbox)){
+                                g_bossShoot[j].active = false;
+
+                            }
+
+                        }
                     }
                     break;
+
                 case 1:
                     if (CheckCollisionRecs(shoot[i].hitbox, g_player.hitbox))
                     {
@@ -529,6 +594,13 @@ void UpdateArc(Shoot * shoot, int maxShoot, int frequency, int flag){
                         }
 
                     }
+                    if(g_boss.active){
+                        if (CheckCollisionRecs(shoot[i].hitbox, g_boss.hitbox)){
+                            g_boss. state= HIT;
+                            g_boss. heat += shoot[i].damage;
+
+                        }
+                    }
                     break;
                 case 1:
                     if (CheckCollisionRecs(shoot[i].hitbox, g_player.hitbox))
@@ -549,6 +621,8 @@ void UpdateArc(Shoot * shoot, int maxShoot, int frequency, int flag){
 
 }
 void UpdateEnemy1(Enemy * enemy, Shoot * shoot, int maxEnemy){
+
+
     for (int i = 0; i < maxEnemy; i++) {
 
         if(enemy[i].active){
@@ -564,6 +638,7 @@ void UpdateEnemy1(Enemy * enemy, Shoot * shoot, int maxEnemy){
                 case DROP:
                     enemy[i].color = GREEN;
                     enemy[i].active = false;
+                    g_enemyKills += 1;
                     break;
             }
 
@@ -611,23 +686,17 @@ void UpdateEnemy1(Enemy * enemy, Shoot * shoot, int maxEnemy){
 
                 // die
                 if(enemy[i].health <= 0) {
-                    enemy[i].active = false;
                     g_enemyKills += 1;
+                    enemy[i].active = false;
+
                 }
-
-
-
-
-
-
-
 
             }
 
 
 
 
-        } else if (g_alpha < 0){
+        } else if (g_alpha < 0 && g_stage <=SECOND){
             enemy[i].hitbox.x = GetRandomValue(40,850);
             enemy[i].hitbox.y = GetRandomValue(-1400, -300);
             enemy[i].health = ENEMY1_HP;
@@ -636,9 +705,18 @@ void UpdateEnemy1(Enemy * enemy, Shoot * shoot, int maxEnemy){
             enemy[i].active =true;
             enemy[i].shootRate = 50;
 
-
         }
+    }
 
+    if (g_stage == THIRD && enemy[1].active == false){
+        enemy[1].hitbox.x = GetRandomValue(40,850);
+        enemy[1].hitbox.y = GetRandomValue(-1400, -300);
+        enemy[1].speed.y = 1;
+        enemy[1].health = ENEMY1_HP;
+        enemy[1].heat = 0;
+        enemy[1].state = NORMAL;
+        enemy[1].active =true;
+        enemy[1].shootRate = 50;
     }
 }
 void UpdateEnemy2(Enemy * enemy, Shoot * shoot, int maxEnemy){
@@ -657,12 +735,13 @@ void UpdateEnemy2(Enemy * enemy, Shoot * shoot, int maxEnemy){
                 case DROP:
                     enemy[i].color = GREEN;
                     enemy[i].active = false;
+                    g_enemyKills += 1;
                     break;
             }
 
             // movement + shoot
             if(enemy[i].state != DROP){
-                if(enemy[i].hitbox.y < 40 ){
+                if(enemy[i].hitbox.y < 140  && (enemy[i].shootRate == 0)){
                     enemy[i].hitbox.y += enemy[i].speed.y;
                 } else{
                     enemy[i].shootRate += 1;
@@ -670,6 +749,7 @@ void UpdateEnemy2(Enemy * enemy, Shoot * shoot, int maxEnemy){
                     if(enemy[i].shootRate >= ENEMY_ARC_FOCUS){
                         if(enemy[i].shootRate >=ENEMY_ARC_FOCUS + ENEMY_ARC_DURATION){
                             enemy[i].shootRate = 0 - ENEMY_ARC_COOLDOWN;
+                            enemy[i].hitbox.y -= enemy[i].speed.y;
                         } else{
                             for (int j = 0; j < NUM_MAX_ENEMY_ARC ; j++) {
                                 if((shoot[j].active == false)){
@@ -682,6 +762,22 @@ void UpdateEnemy2(Enemy * enemy, Shoot * shoot, int maxEnemy){
                             }
                         }
 
+                    } else if (enemy[i].shootRate < 0){
+                        enemy[i].hitbox.y -= 2 * enemy[i].speed.y;
+                        if(enemy[i].hitbox.y < 200){
+                            enemy[i].hitbox.x = g_player.hitbox.x + GetRandomValue(-40,40);
+                            if(g_player.hitbox.x < 78){
+                                enemy[i].hitbox.x = 78;
+                            } else if(g_player.hitbox.x > 840){
+                                enemy[i].hitbox.x = 840;
+                            }
+                            enemy[i].hitbox.y = GetRandomValue(-1000,-500);
+                            enemy[i].heat = 0;
+                            enemy[i].state = NORMAL;
+                            enemy[i].active =true;
+                            enemy[i].color = WHITE;
+                            enemy[i].shootRate = 0;
+                        }
                     }
 
                 }
@@ -710,7 +806,12 @@ void UpdateEnemy2(Enemy * enemy, Shoot * shoot, int maxEnemy){
 
 
         } else if (g_alpha < 0 && (g_stage >= SECOND)){
-            enemy[i].hitbox.x = 78 + GetRandomValue(0,5) * 152;
+            enemy[i].hitbox.x = g_player.hitbox.x + GetRandomValue(-40,40);
+            if(g_player.hitbox.x < 78){
+                enemy[i].hitbox.x = 78;
+            } else if(g_player.hitbox.x > 840){
+                enemy[i].hitbox.x = 840;
+            }
             enemy[i].hitbox.y = GetRandomValue(-2000,-600);
             enemy[i].health = ENEMY2_HP;
             enemy[i].heat = 0;
@@ -811,6 +912,116 @@ void UpdateEnemy3(Enemy * enemy, Shoot * shoot, int maxEnemy){
         }
     }
 }
+void UpdateBoss(Enemy * enemy, Shoot * shoot){
+    if(enemy->active){
+        // color
+        switch (enemy->state) {
+            case NORMAL:
+                enemy->color = WHITE;
+                break;
+            case HIT:
+                enemy->color = RED;
+                enemy->state = NORMAL;
+                break;
+            case DROP:
+                enemy->color = GREEN;
+                enemy->active = false;
+                break;
+        }
+
+        // movement + shoot
+        if(enemy->state != DROP){
+            if(enemy->hitbox.y < 20 ){
+                enemy->hitbox.y += enemy->speed.y;
+            } else{
+                enemy->shootRate += 1;
+                if(0 < enemy->shootRate){
+                    if(enemy->shootRate >= BOSS_ARC_COOLDOWN){
+                        if( (BOSS_ARC_COOLDOWN + BOSS_ARC_FOCUS <= enemy->shootRate) && ( enemy->shootRate <= BOSS_ARC_COOLDOWN + BOSS_ARC_FOCUS + BOSS_ARC_DURATION)){
+                            for (int j = 0; j < NUM_MAX_BOSS_ARC ; j++) {
+                                if(shoot[j].active == false){
+                                    shoot[j].hitbox.x = enemy->hitbox.x;
+                                    shoot[j].hitbox.y = enemy->hitbox.y + 192;
+                                    shoot[j].active = true;
+
+                                    break;
+                                }
+                            }
+                        } else if (enemy->shootRate >= BOSS_ARC_COOLDOWN + BOSS_ARC_FOCUS + BOSS_ARC_DURATION){
+                            enemy->shootRate = 0 - BOSS_ARC_COOLDOWN;
+                        }
+
+                    } else if(enemy->shootRate <= BOSS_ARC_COOLDOWN ){
+                        for (int i = 0; i < NUM_MAX_BOSS_SHOOT; i++) {
+                            if(shoot[i].active == false && (enemy->shootRate % BOSS_SHOOT_FREQUENCY == 0)){
+                                shoot[i].hitbox.x = enemy->hitbox.x + 28;
+                                shoot[i].hitbox.y = enemy->hitbox.y + 108;
+                                shoot[i].speed.x = 10 * (g_player.hitbox.x + 24 - shoot[i].hitbox.x) / ( g_player.hitbox.y + 32 - shoot[i].hitbox.y );
+                                shoot[i].speed.y = -10;
+                                shoot[i].active = true;
+                                break;
+                            }
+                        }
+
+                        for (int i = 0; i < NUM_MAX_BOSS_SHOOT; i++) {
+                            if(shoot[i].active == false && (enemy->shootRate % BOSS_SHOOT_FREQUENCY == 0)){
+                                shoot[i].hitbox.x = enemy->hitbox.x + 216;
+                                shoot[i].hitbox.y = enemy->hitbox.y + 108;
+                                shoot[i].speed.x = 8 * (g_player.hitbox.x + 24 - shoot[i].hitbox.x) / ( g_player.hitbox.y + 32 - shoot[i].hitbox.y );
+                                shoot[i].speed.y = -8;
+                                shoot[i].active = true;
+                                break;
+                            }
+                        }
+
+                    }
+                }
+
+
+            }
+
+            if(CheckCollisionRecs(g_player.hitbox, enemy->hitbox)){
+                enemy->state = HIT;
+                enemy->health -= 2;
+                g_player.state = HIT;
+                g_numOfShield -= 1;
+            }
+
+            // response to arc
+            if(enemy->heat > BOSS_HEAT_MAX){
+                enemy->state = HIT;
+                enemy->health -= 1;
+                enemy->heat = 0;
+            }
+
+            // die
+            if(enemy->health <= 0) {
+                enemy->active = false;
+                g_enemyKills += 1;
+                g_isWin = true;
+            }
+
+        }
+
+
+
+    } else if (g_alpha < 0 && (g_stage == THIRD)){
+        g_boss.active = true;
+        g_boss.hitbox.width = 256;
+        g_boss.hitbox.height = 176;
+        g_boss.hitbox.x = 352;
+        g_boss.hitbox.y = -300;
+        g_boss.type = BOSS;
+        g_boss.state = NORMAL;
+        g_boss.speed.y = 1;
+        g_boss.color = WHITE;
+        g_boss.health = BOSS_HP;
+        g_boss.shootRate = 0;
+        g_boss.heat = 0;
+
+
+    }
+}
 void UpdateItems(Enemy * enemy, Shoot * shoot, int maxEnemy){
     for (int i = 0; i < maxEnemy; i++) {
 
@@ -844,7 +1055,7 @@ void UpdateItems(Enemy * enemy, Shoot * shoot, int maxEnemy){
                         g_numOfArc += 1;
                         break;
                     case S:
-                        g_numOfShield += 1;
+                        g_numOfShield += 2;
                         break;
                     case H:
                         g_numOfHive += 1;
@@ -873,7 +1084,7 @@ void UpdateItems(Enemy * enemy, Shoot * shoot, int maxEnemy){
 void UpdateGame(void){
     if(g_isGameOver == false){
 
-        if(g_isStarted && (g_isPaused == false)){
+        if(g_isStarted && (g_isPaused == false) && (g_isWin == false)){
 
             //Player control
 
@@ -883,6 +1094,8 @@ void UpdateGame(void){
             if(IsKeyDown('D')) g_player.hitbox.x += g_player.speed.x;
             /*g_player.hitbox.x = GetMouseX() - 32;
             g_player.hitbox.y = GetMouseY() - 32;*/
+            if(IsKeyDown('T')) g_numOfShield += 1;
+
 
             if(IsKeyPressed('J') && g_numOfArc > 0) {
                 g_arcActive = true;
@@ -996,11 +1209,19 @@ void UpdateGame(void){
 
             }
 
+
+
             // enemies
 
             UpdateEnemy1(g_enemy1, g_enemyShoot, NUM_MAX_ENEMY1);
             UpdateEnemy2(g_enemy2, g_enemyArc, NUM_MAX_ENEMY2);
             UpdateEnemy3(g_enemy3, g_enemyShoot, NUM_MAX_ENEMY3);
+            if(g_boss.shootRate >= BOSS_ARC_COOLDOWN){
+                UpdateBoss(&g_boss, g_bossArc);
+            } else{
+                UpdateBoss(&g_boss, g_bossShoot);
+            }
+
 
             UpdateItems(g_items, g_enemyShoot, NUM_MAX_ITEM);
 
@@ -1011,8 +1232,10 @@ void UpdateGame(void){
             UpdateShoot(g_hiveL, NUM_PLAYER_HIVE, PLAYER_HIVE_FREQUENCY, 0);
             UpdateShoot(g_hiveR, NUM_PLAYER_HIVE, PLAYER_HIVE_FREQUENCY, 0);
             UpdateShoot(g_enemyShoot, NUM_MAX_ENEMY_SHOOT,ENEMY_SHOOT_FREQUENCY,1);
+            UpdateShoot(g_bossShoot, NUM_MAX_BOSS_SHOOT, BOSS_SHOOT_FREQUENCY, 1);
             UpdateArc(g_enemyArc, NUM_MAX_ENEMY_ARC, 0, 1);
             UpdateArc(g_playerArc, NUM_PLAYER_ARC, 0, 0);
+            UpdateArc(g_bossArc, NUM_MAX_ENEMY_ARC, 0, 1);
 
 
 
@@ -1035,7 +1258,7 @@ void UpdateGame(void){
 
                         if (g_smooth) g_alpha -= 0.02f;
 
-                        if (g_enemyKills/2 == FIRST_REQUIREMENT)
+                        if (g_enemyKills == FIRST_REQUIREMENT)
                         {
                             g_enemyKills = 0;
                             g_stage = SECOND;
@@ -1055,7 +1278,7 @@ void UpdateGame(void){
                         if (g_smooth) g_alpha -= 0.02f;
 
 
-                        if (g_enemyKills/2 == SECOND_REQUIREMENT)
+                        if (g_enemyKills == SECOND_REQUIREMENT)
                         {
                             g_enemyKills = 0;
                             g_stage = THIRD;
@@ -1093,6 +1316,12 @@ void UpdateGame(void){
                 g_isPaused = true;
             } else if( IsKeyPressed('W') || IsKeyPressed('S') || IsKeyPressed('A') || IsKeyPressed('D')){
                 g_isStarted = true;
+            }
+        } else if(g_isWin){
+            if(WindowShouldClose()){
+                CloseWindow();
+            } else if(IsKeyPressed(KEY_ENTER)){
+                g_retry = true;
             }
         }
 
@@ -1145,7 +1374,7 @@ void DrawUI(void ){
 
 
 
-    DrawText(TextFormat("KILL: %d", g_enemyKills/2), 480 - MeasureText("KILL:100",48)/2, 880, 48, WHITE);
+    DrawText(TextFormat("KILL: %d", g_enemyKills), 480 - MeasureText("KILL:100",48)/2, 880, 48, WHITE);
 
 }
 void DrawGame(void)
@@ -1227,7 +1456,6 @@ void DrawGame(void)
         for (int i = 0; i < NUM_MAX_ENEMY_SHOOT; i++) {
             if(g_enemyShoot[i].active){
                 DrawTextureEx(g_enemyShootTexture, (Vector2){g_enemyShoot[i].hitbox.x, g_enemyShoot[i].hitbox.y}, 0, 0.5f, WHITE);
-
             }
         }
 
@@ -1282,6 +1510,31 @@ void DrawGame(void)
             }
         }
 
+        if(g_boss.active){
+            DrawText(TextFormat("%d",g_boss.health),480, 480, 32, RED);
+            DrawTextureEx(g_bossTexture, (Vector2){g_boss.hitbox.x, g_boss.hitbox.y}, 0, 0.5f, g_boss.color);
+            for (int i = 0; i < NUM_MAX_BOSS_SHOOT; i++) {
+                if(g_bossShoot[i].active){
+                    DrawTextureEx(g_bossShootTexture, (Vector2){g_bossShoot[i].hitbox.x, g_bossShoot[i].hitbox.y - 4}, 0, 0.5f, WHITE);
+                }
+            }
+            if( (g_boss.shootRate > BOSS_ARC_COOLDOWN) && (g_boss.shootRate < BOSS_ARC_FOCUS + BOSS_ARC_COOLDOWN) ){
+                DrawRectangle(g_boss.hitbox.x + 124, g_boss.hitbox.y + 176, 8, 900, RED);
+            }
+            if( (g_boss.shootRate >= BOSS_ARC_FOCUS + BOSS_ARC_COOLDOWN) && (g_boss.shootRate < BOSS_ARC_COOLDOWN + BOSS_ARC_FOCUS + BOSS_ARC_DURATION)){
+
+                DrawTextureEx(g_bossArcHTexture, (Vector2){g_boss.hitbox.x, g_boss.hitbox.y + 184}, 0, 0.5f,
+                              Fade(WHITE,64));
+                DrawTextureEx(g_bossArcBTexture, (Vector2){g_boss.hitbox.x, g_boss.hitbox.y + 184 + 192}, 0, 0.5f,
+                              Fade(WHITE,64));
+                DrawTextureEx(g_bossArcBTexture, (Vector2){g_boss.hitbox.x, g_boss.hitbox.y + 184 + 2*192}, 0, 0.5f,
+                              Fade(WHITE,64));
+                DrawTextureEx(g_bossArcBTexture, (Vector2){g_boss.hitbox.x, g_boss.hitbox.y + 184 + 3*192}, 0, 0.5f,
+                              Fade(WHITE,64));
+
+            }
+        }
+
 
 
         DrawUI();
@@ -1303,6 +1556,12 @@ void DrawGame(void)
     if(g_isGameOver){
         DrawRectangle(0,0,960,960,CLITERAL(Color){ 0, 0, 0, 180 });
         DrawText("--- GAME OVER ---", 480 - MeasureText("--- GAME OVER ---", 48)/2, 400, 48, RED);
+        DrawText("press [ENTER] to play again", 480 - MeasureText("press [ENTER] to play again", 32)/2, 480, 32, RED);
+        DrawText("press [ESC] to exit", 480 - MeasureText("press [ESC] to exit", 32)/2, 520, 32, RED);
+    }
+
+    if(g_isWin){
+        DrawText("--- YOU WIN ---", 480 - MeasureText("--- YOU WIN ---", 48)/2, 400, 48, RED);
         DrawText("press [ENTER] to play again", 480 - MeasureText("press [ENTER] to play again", 32)/2, 480, 32, RED);
         DrawText("press [ESC] to exit", 480 - MeasureText("press [ESC] to exit", 32)/2, 520, 32, RED);
     }
