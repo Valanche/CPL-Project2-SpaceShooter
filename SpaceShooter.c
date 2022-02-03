@@ -33,8 +33,8 @@
 #define PLAYER_HEAT_MAX 96
 #define PLAYER_INIT_SHIELDS 3
 #define PLAYER_MAX_SHIELDS 9
-#define PLAYER_INIT_HIVE 3
-#define PLAYER_INIT_ARC 3
+#define PLAYER_INIT_HIVE 1
+#define PLAYER_INIT_ARC 2
 #define PLAYER_ARC_DURATION 512
 #define PLAYER_HIVE_DURATION 256
 
@@ -66,7 +66,7 @@
 
 
 // other stats
-#define FIRST_REQUIREMENT 24
+#define FIRST_REQUIREMENT 16
 #define SECOND_REQUIREMENT 48
 
 
@@ -128,6 +128,8 @@ typedef struct Shoot{
 
     static Enemy g_items[NUM_MAX_ITEM] = {0};
     static Enemy g_stars[NUM_STAR_DENSITY] = {0};
+    static Enemy g_gate[2] = {0};
+
 
     static Shoot g_playerShoot[NUM_PLAYER_SHOOT] = {0};
     static Shoot g_playerArc[NUM_PLAYER_ARC] = {0};
@@ -158,6 +160,8 @@ typedef struct Shoot{
     static bool g_smooth = false;
     static bool g_isWin =  false;
     static bool g_retry = false;
+    static bool g_exit = false;
+
 
     static bool g_arcActive = false;
     static bool g_hiveActive = false;
@@ -173,11 +177,12 @@ typedef struct Shoot{
 
 
     //audios
+    Sound g_bgm;
 
 //------------------------------------------------------------------------------------
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
-static void LoadImgs(void);//Load textures
+static void LoadResources(void);//Load textures
 static void InitGame(void);// Initialize game
 static void UpdateGame(void);       // Update game (one frame)
 static void UpdateShoot(Shoot *shoot, int maxShoot, int frequency, int flag);
@@ -202,14 +207,16 @@ int main(void)
     // Initialization (Note windowTitle is unused on Android)
     //---------------------------------------------------------
     InitWindow(960, 960, "Space Shooter");
+    InitAudioDevice();
+    SetMasterVolume(0.1f);
 
     SetTargetFPS(60);
-    LoadImgs();
+    LoadResources();
     retry:
     InitGame();
 
     // Main game loop
-    while (999)
+    while (!g_exit)
     {
         // Update and Draw
         //----------------------------------------------------------------------------------
@@ -219,14 +226,17 @@ int main(void)
         }
         //----------------------------------------------------------------------------------
     }
+    UnloadSound(g_bgm);
+    CloseAudioDevice();
+    CloseWindow();
     return 0;
 }
 
 //------------------------------------------------------------------------------------
 // Module Functions Definitions (local)
 //------------------------------------------------------------------------------------
-//Load textures
-void LoadImgs(void){
+//Load
+void LoadResources(void){
     //Load images
     g_arcTexture = LoadTexture("Textures/Arc.png");
     g_hiveTexture = LoadTexture("Textures/Hive.png");
@@ -254,6 +264,9 @@ void LoadImgs(void){
     g_bossArcHTexture = LoadTexture("Textures/BArcHead.png");
     g_bossArcBTexture = LoadTexture("Textures/BArcBody.png");
 
+    // Load BGM
+    g_bgm = LoadSound("Audios/HSD.wav");
+
 }
 
 // Initialize game variables
@@ -275,6 +288,8 @@ void InitGame(void)
     g_smooth = false;
     g_isWin =  false;
     g_retry = false;
+    g_exit = false;
+
 
     g_arcActive = false;
 
@@ -296,7 +311,7 @@ void InitGame(void)
     for (int i = 0; i < NUM_ENEMY1_STAGE1; i++) {
         g_enemy1[i].active = false;
         g_enemy1[i].hitbox.width = 68;
-        g_enemy1[i].hitbox.height = 128;
+        g_enemy1[i].hitbox.height = 96;
         g_enemy1[i].hitbox.x = GetRandomValue(40, 850);
         g_enemy1[i].hitbox.y = GetRandomValue(-1400,-300);
         g_enemy1[i].type = EDEFAULT;
@@ -463,6 +478,22 @@ void InitGame(void)
         g_stars[i].shootRate = 0;
         g_stars[i].heat = 0;
     }
+    for (int i = 0; i < 2; i++) {
+        g_gate[i].active = false;
+        g_gate[i].hitbox.width = 420;
+        g_gate[i].hitbox.height = 960;
+        g_gate[i].type = DEFUALT;
+        g_gate[i].state = NORMAL;
+        g_gate[i].speed.x = 3;
+        g_gate[i].color = WHITE;
+        g_gate[i].health = 0;
+        g_gate[i].shootRate = 0;
+        g_gate[i].heat = 0;
+    }
+    g_gate[0].hitbox.x = 0;
+    g_gate[0].hitbox.y = 0;
+    g_gate[1].hitbox.x = 540;
+    g_gate[1].hitbox.y = 0;
 }
 // Update game (one frame)
 void UpdateShoot(Shoot * shoot, int maxShoot, int frequency, int flag){
@@ -474,10 +505,24 @@ void UpdateShoot(Shoot * shoot, int maxShoot, int frequency, int flag){
             shoot[i].hitbox.y -= shoot[i].speed.y;
             shoot[i].hitbox.x += shoot[i].speed.x;
 
+            int numOfEnemy1 = 0;
+            switch (g_stage) {
+                case FIRST:
+                    numOfEnemy1 = NUM_ENEMY1_STAGE1;
+                    break;
+                case SECOND:
+                    numOfEnemy1 = NUM_ENEMY1_STAGE2;
+                    break;
+                case THIRD:
+                    numOfEnemy1 = NUM_ENEMY1_STAGE3;
+                    break;
+
+            }
+
             // Collision with ?
             switch (flag) {
                 case 0:
-                    for (int j = 0; j < NUM_ENEMY1_STAGE1; j++)
+                    for (int j = 0; j < numOfEnemy1; j++)
                     {
                         if (g_enemy1[j].active)
                         {
@@ -1374,7 +1419,17 @@ void UpdateStars(void){
 
     }
 }
+void UpdateGate(void){
+    if(g_gate[0].hitbox.x > -420){
+        g_gate[0].hitbox.x -= g_gate[0].speed.x;
+    }
+    if(g_gate[1].hitbox.x < 960){
+        g_gate[1].hitbox.x += g_gate[1].speed.x;
+    }
 
+
+
+}
 void UpdateGame(void){
     if(g_isGameOver == false){
 
@@ -1387,7 +1442,7 @@ void UpdateGame(void){
             if(IsKeyDown('D')) g_player.hitbox.x += g_player.speed.x;
             /*g_player.hitbox.x = GetMouseX() - 32;
             g_player.hitbox.y = GetMouseY() - 32;*/
-            if(IsKeyDown('T')) g_numOfShield += 1;
+
 
 
             if(IsKeyPressed('J') && (g_numOfArc > 0) && (g_arcActive == false)) {
@@ -1402,7 +1457,7 @@ void UpdateGame(void){
 
             //WALL
             if(g_player.hitbox.x <=44) g_player.hitbox.x = 44;
-            if(g_player.hitbox.x >=832) g_player.hitbox.x = 832;
+            if(g_player.hitbox.x >=864) g_player.hitbox.x = 864;
             if(g_player.hitbox.y <= 4) g_player.hitbox.y = 4;
             if(g_player.hitbox.y >= 760) g_player.hitbox.y = 760;
 
@@ -1498,11 +1553,9 @@ void UpdateGame(void){
 
             //gameover ///
             if(g_numOfShield < 0){
-                g_numOfShield = 0;
+                g_isGameOver = true;
 
             }
-
-
 
             // enemies
 
@@ -1529,6 +1582,7 @@ void UpdateGame(void){
 
             UpdateItems(g_items, g_enemyShoot, NUM_MAX_ITEM);
             UpdateStars();
+            UpdateGate();
 
 
 
@@ -1609,11 +1663,14 @@ void UpdateGame(void){
             }
 
         }else if(g_isPaused){
-
+            PauseSound(g_bgm);
             if(IsKeyPressed('P') || WindowShouldClose()){
                 g_isPaused = false;
+                ResumeSound(g_bgm);
+
             } else if(IsKeyPressed('Q')){
-                CloseWindow();
+                g_exit = true;
+                StopSound(g_bgm);
             }
 
         }else if(g_isStarted == false){
@@ -1621,20 +1678,26 @@ void UpdateGame(void){
                 g_isPaused = true;
             } else if( IsKeyPressed('W') || IsKeyPressed('S') || IsKeyPressed('A') || IsKeyPressed('D')){
                 g_isStarted = true;
+                PlaySound(g_bgm);
             }
         } else if(g_isWin){
+            StopSound(g_bgm);
             if(WindowShouldClose()){
-                CloseWindow();
+                g_exit = true;
             } else if(IsKeyPressed(KEY_ENTER)){
                 g_retry = true;
+
             }
         }
 
     } else {
+        StopSound(g_bgm);
         if(WindowShouldClose()){
-            CloseWindow();
+            g_exit = true;
+
         } else if(IsKeyPressed(KEY_ENTER)){
             g_retry = true;
+
         }
     }
 
@@ -1688,6 +1751,10 @@ void DrawGame(void)
     ClearBackground(BLACK);
     for (int i = 0; i < NUM_STAR_DENSITY; i++) {
         DrawRectangleRec(g_stars[i].hitbox, WHITE);
+    }
+    for (int i = 0; i < 2; i++) {
+        DrawRectangleRec(g_gate[i].hitbox, GRAY);
+        DrawRectangle(g_gate[i].hitbox.x + 20, g_gate[i].hitbox.y + 10, 380, 960, LIGHTGRAY);
     }
 
 
@@ -1787,6 +1854,7 @@ void DrawGame(void)
             if(g_enemy1[i].active){
                 DrawTextureEx(g_enemy1Texture,(Vector2){g_enemy1[i].hitbox.x - 32, g_enemy1[i].hitbox.y - 16}, 0, 0.5f, g_enemy1[i].color);
             }
+
         }
 
         for (int i = 0; i < NUM_MAX_ENEMY2; i++) {
@@ -1830,11 +1898,13 @@ void DrawGame(void)
 
                 }
                 DrawTextureEx(E3, (Vector2){g_enemy3[i].hitbox.x - 16, g_enemy3[i].hitbox.y - 16}, 0, 0.5f, g_enemy3[i].color);
+
             }
         }
 
         if(g_boss.active){
-            DrawText(TextFormat("%d",g_boss.health),480, 480, 32, RED);
+            DrawRectangle(100,790,760,20, DARKGREEN);
+            DrawRectangle(105,794,750 * (g_boss.health * 1.0f / BOSS_HP),12, RED);
             DrawTextureEx(g_bossTexture, (Vector2){g_boss.hitbox.x, g_boss.hitbox.y}, 0, 0.5f, g_boss.color);
             for (int i = 0; i < NUM_MAX_BOSS_SHOOT; i++) {
                 if(g_bossShoot[i].active){
@@ -1864,8 +1934,90 @@ void DrawGame(void)
 
 
     }else{
+
+
         DrawUI();
-        DrawText("[ Move to Start ]", 480 - MeasureText("[ Move to Start ]",32)/2, 440, 32, GRAY);
+        DrawText("GUIDE", 80, 55, 48, BLACK);
+
+        DrawText("Controls", 80, 120, 32, BLACK);
+        DrawText("[WASD] : move", 80, 170, 32, BLACK);
+        DrawText("[J] : Laser", 80, 210, 32, BLACK);
+        DrawText("[K] : Missiles", 80, 250, 32, BLACK);
+        DrawText("[P]/[esc] : Pause", 80, 290, 32, BLACK);
+
+        DrawText("UI", 80, 390, 32, BLACK);
+
+        DrawText("Exposing to enemy", 80, 430, 32, BLACK);
+        DrawText("laser increase your", 80, 460, 32, BLACK);
+        DrawText("'heat'", 80, 490, 32, BLACK);
+        DrawRectangle(180, 500, 200,8,YELLOW );
+        DrawRectangle(380, 500, 8,320,YELLOW );
+        DrawText("HEAT",390,800,24,WHITE);
+
+        DrawText("When it's full, ", 80, 530, 32, BLACK);
+        DrawText("you lost 1 HP", 80, 560, 32, BLACK);
+        DrawRectangle(300, 570, 50,8,YELLOW );
+        DrawRectangle(350, 570, 8,274,YELLOW );
+        DrawRectangle(350, 844, 12,8,YELLOW );
+        DrawText("HP",350,860,24,WHITE);
+
+
+        DrawText("The green square", 80, 600, 32, BLACK);
+        DrawText("is your hitbox,", 80, 630, 32, BLACK);
+        DrawText("appears when HP>0", 80, 660, 32, BLACK);
+        DrawRectangle(314, 644, 136,8, ORANGE );
+
+        DrawText("Enemies", 580, 120, 32, BLACK);
+        DrawTextureEx(g_enemy1Texture,(Vector2){580,150},0,0.25f,WHITE);
+        DrawText("Enemy1", 650, 160, 32, BLACK);
+        DrawTextureEx(g_enemy2Texture,(Vector2){580,210},0,0.25f,WHITE);
+        DrawText("Enemy2", 650, 220, 32, BLACK);
+        DrawTextureEx(g_enemy3OTexture,(Vector2){580,270},0,0.25f,WHITE);
+        DrawText("Enemy3", 650, 280, 32, BLACK);
+        DrawTextureEx(g_bossTexture,(Vector2){580,330},0,0.25f,WHITE);
+        DrawText("Boss", 720, 360, 32, BLACK);
+        DrawText("You lost 1 HP if you", 580, 420, 32, BLACK);
+        DrawText("let Enemy1 escape.", 580, 450, 32, BLACK);
+        DrawText("Collision with enemies", 580, 490, 32, BLACK);
+        DrawText("takes you 1 HP.", 580, 520, 32, BLACK);
+        DrawText("Colored Enemy3", 580, 560, 32, BLACK);
+        DrawText("drops items,", 580, 590, 32, BLACK);
+        DrawText("touch to get them.", 580, 620, 32, BLACK);
+        DrawText("If HP<0, you lose.", 580, 660, 32, RED);
+
+        DrawText("Move", 480- MeasureText("Move",32)/2, 380, 32, GRAY);
+        DrawText("to", 480- MeasureText("to",32)/2, 420, 32, GRAY);
+        DrawText("Start", 480- MeasureText("Start",32)/2, 460, 32, GRAY);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     //Paused
