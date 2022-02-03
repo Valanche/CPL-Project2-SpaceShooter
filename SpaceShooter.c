@@ -31,10 +31,9 @@
 #define PLAYER_SHOOT_FREQUENCY 8
 #define PLAYER_HIVE_FREQUENCY 6
 #define PLAYER_HEAT_MAX 96
-#define PLAYER_INIT_SHIELDS 3
-#define PLAYER_MAX_SHIELDS 9
-#define PLAYER_INIT_HIVE 1
-#define PLAYER_INIT_ARC 2
+#define PLAYER_INIT_SHIELDS 6
+#define PLAYER_INIT_HIVE 3
+#define PLAYER_INIT_ARC 3
 #define PLAYER_ARC_DURATION 512
 #define PLAYER_HIVE_DURATION 256
 
@@ -192,6 +191,8 @@ static void UpdateEnemy2(Enemy * enemy, Shoot * shoot, int maxEnemy);
 static void UpdateEnemy3(Enemy * enemy, Shoot * shoot, int maxEnemy);
 static void UpdateBoss(Enemy * enemy, Shoot * shoot);
 static void UpdateItems(Enemy * enemy, Shoot * shoot, int maxEnemy);
+static void UpdateStars(void);
+static void UpdateGate(void);
 
 static void DrawGame(void);         // Draw game (one frame)
 static void DrawUI(void);
@@ -1372,6 +1373,9 @@ void UpdateItems(Enemy * enemy, Shoot * shoot, int maxEnemy){
                         break;
                     case S:
                         g_numOfShield += 2;
+                        if(g_numOfShield > 9){
+                            g_numOfShield = 9;
+                        }
                         break;
                     case H:
                         g_numOfHive += 1;
@@ -2047,12 +2051,6 @@ void DrawGame(void)
 
 
     EndDrawing();
-}
-
-
-// Unload game variables
-void UnloadGame(void)
-{
 }
 
 // Update and Draw (one frame)
